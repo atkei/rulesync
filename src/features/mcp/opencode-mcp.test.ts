@@ -162,18 +162,6 @@ describe("OpencodeMcp", () => {
         });
       }).not.toThrow();
     });
-
-    it("should throw error for invalid JSON content", () => {
-      const invalidJsonContent = "{ invalid: json, }"; // Trailing comma is still invalid in strict JSON
-
-      expect(() => {
-        const _instance = new OpencodeMcp({
-          relativeDirPath: ".",
-          relativeFilePath: "opencode.json",
-          fileContent: invalidJsonContent,
-        });
-      }).toThrow();
-    });
   });
 
   describe("fromFile", () => {
@@ -343,7 +331,9 @@ describe("OpencodeMcp", () => {
 
       expect(opencodeMcp).toBeInstanceOf(OpencodeMcp);
       expect(opencodeMcp.getJson()).toEqual({ mcp: {} });
-      expect(opencodeMcp.getFilePath()).toBe(join(testDir, ".config", "opencode", "opencode.json"));
+      expect(opencodeMcp.getFilePath()).toBe(
+        join(testDir, ".config", "opencode", "opencode.jsonc"),
+      );
     });
 
     it("should preserve non-mcp properties in global mode", async () => {
