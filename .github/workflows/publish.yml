@@ -42,4 +42,4 @@ jobs:
             echo "::error::Invalid release tag derived from branch: $HEAD_BRANCH"
             exit 1
           fi
-          gh release edit "$TAG" --draft=false
+          gh release edit "$TAG" --draft=false --latest
