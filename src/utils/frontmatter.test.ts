@@ -9,22 +9,25 @@ const mockMatter = vi.hoisted(() => ({
 }));
 
 vi.mock("gray-matter", async () => {
-  const actual = await vi.importActual<typeof import("gray-matter")>("gray-matter");
-  const mockedDefault = vi.fn((...args: Parameters<typeof actual.default>) => {
+  const actualModule = await vi.importActual<typeof import("gray-matter")>("gray-matter");
+  // gray-matter is a CommonJS module that exports a function directly
+  // vi.importActual returns the module object, but with esModuleInterop, the function is on .default
+  const actualFn =
+    (actualModule as unknown as { default: typeof actualModule }).default || actualModule;
+
+  const mockedMatter = vi.fn((...args: Parameters<typeof actualFn>) => {
     if (mockMatter.shouldThrow) {
       throw new Error(mockMatter.errorMessage);
     }
-    return actual.default(...args);
+    return actualFn(...args);
   });
   // Copy over all properties from the original module
-  return {
-    default: Object.assign(mockedDefault, {
-      stringify: actual.default.stringify,
-      parse: actual.default.parse,
-      test: actual.default.test,
-      language: actual.default.language,
-    }),
-  };
+  const mockedModule = Object.assign(mockedMatter, {
+    stringify: actualModule.stringify,
+    test: actualModule.test,
+    language: actualModule.language,
+  });
+  return { default: mockedModule };
 });
 
 describe("frontmatter utilities", () => {
